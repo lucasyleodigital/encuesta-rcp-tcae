@@ -166,7 +166,6 @@ function renderQuestion(){
             <span><b>${q.correct ? LETTERS[k] : k + 1}</b><span style="padding:0;border:0">${esc(t)}</span></span>
           </label>`).join('')}
       </fieldset>
-      <input class="hp" type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
       <div class="nav">
         ${i > 0 ? `<button type="button" class="btn btn-ghost" id="prev">${icon.back} Atrás</button>` : '<span></span>'}
         <button type="submit" class="btn btn-primary" id="next" ${sel ? '' : 'disabled'}>${last ? 'Enviar respuestas' : 'Siguiente'} ${icon.arrow}</button>
@@ -180,7 +179,7 @@ function renderQuestion(){
   form.addEventListener('submit', e => {
     e.preventDefault();
     if (!state.answers[q.id]) return;
-    if (last) submit(form.website.value); else go(i + 1);
+    if (last) submit(); else go(i + 1);
   });
   const prev = document.getElementById('prev');
   if (prev) prev.onclick = () => go(i - 1);
@@ -194,7 +193,7 @@ function go(step){
   if (first) first.focus({ preventScroll: true });
 }
 
-async function submit(honeypot){
+async function submit(){
   const btn = document.getElementById('next'), err = document.getElementById('err');
   btn.disabled = true; btn.textContent = 'Enviando...';
   const score = KNOWLEDGE.filter(q => state.answers[q.id] === q.correct).length;
@@ -210,7 +209,7 @@ async function submit(honeypot){
     total: KNOWLEDGE.length
   };
   try {
-    if (!honeypot) await save(row);
+    await save(row);
     try { localStorage.setItem(DONE_KEY, '1'); } catch(e){}
     renderResult(score);
   } catch(e){

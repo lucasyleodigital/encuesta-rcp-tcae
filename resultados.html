@@ -420,7 +420,17 @@ async function load(){
 async function showDash(){
   $('login').hidden = true; $('dash').hidden = false;
   $('demoBanner').hidden = hasBackend; $('logout').hidden = !hasBackend;
-  fillFilters(); await load();
+  fillFilters();
+  if (hasBackend){
+    // Sin permiso de admin, Supabase devuelve 0 filas sin error: avisamos explícitamente.
+    const [{ data: isAdmin }, { data: u }] = await Promise.all([sb.rpc('es_admin_panel'), sb.auth.getUser()]);
+    if (isAdmin !== true){
+      const b = $('demoBanner');
+      b.querySelector('span').innerHTML = `<strong>Sin permiso para ver las respuestas.</strong> El usuario <strong>${esc(u?.user?.email || '')}</strong> no está en la tabla <code>panel_admins</code> de Supabase. Añádelo en el SQL Editor: <code>insert into public.panel_admins (email) values ('${esc(u?.user?.email || '')}');</code>`;
+      b.hidden = false;
+    }
+  }
+  await load();
 }
 
 $('reload').onclick = load;
