@@ -142,8 +142,18 @@ $('copySubject').onclick = async () => {
   flash($('copySubject'), 'Copiado');
 };
 
+// En Webmail se pega como código: ahí el botón va hecho con tabla y color de fondo,
+// sin imagen, para que se vea aunque el correo bloquee las imágenes externas.
+const CODE_BUTTON = `<table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center" style="margin:0 auto;"><tr>
+<td align="center" bgcolor="#0b7a55" style="background-color:#0b7a55;border-radius:10px;padding:14px 28px;">
+<a href="https://lucasyleodigital.github.io/encuesta-rcp-tcae/" target="_blank" style="color:#ffffff;font-family:Arial,Helvetica,sans-serif;font-size:17px;font-weight:bold;line-height:22px;text-decoration:none;display:inline-block;"><span style="color:#ffffff;">Responder la encuesta &rarr;</span></a>
+</td></tr></table>`;
+
 $('copyCode').onclick = async () => {
-  const html = `<div style="background:#f4f6f5">${$('email').innerHTML}</div>`;
+  const clone = $('email').cloneNode(true);
+  const img = clone.querySelector('img[src*="boton-encuesta"]');
+  if (img) img.closest('a').outerHTML = CODE_BUTTON;
+  const html = `<div style="background:#f4f6f5">${clone.innerHTML}</div>`;
   try { await navigator.clipboard.writeText(html); }
   catch(e){
     const t = Object.assign(document.createElement('textarea'), { value: html });
