@@ -1,0 +1,349 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Encuesta RCP y DEA · TCAE</title>
+<meta name="description" content="Encuesta anónima de conocimientos sobre RCP, DEA y 112 para el colectivo TCAE.">
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#f4f6f5; --card:#ffffff; --ink:#14201b; --muted:#5b6b64; --line:#dde4e0;
+    --accent:#0b7a55; --accent-ink:#ffffff; --accent-soft:#e3f2ec;
+    --heart:#c8323c; --ok:#0b7a55; --ok-soft:#e3f2ec; --bad:#b4232e; --bad-soft:#fbe9ea;
+    --radius:14px; --shadow:0 1px 2px rgba(20,32,27,.06),0 8px 24px rgba(20,32,27,.06);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#0f1513; --card:#17201d; --ink:#e7eeea; --muted:#9aaba3; --line:#2a3631;
+      --accent:#3cc292; --accent-ink:#06120d; --accent-soft:#16332a;
+      --heart:#ef6670; --ok:#3cc292; --ok-soft:#16332a; --bad:#ef6670; --bad-soft:#3a1a1d;
+      --shadow:none;
+    }
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{background:var(--bg);color:var(--ink);font:16px/1.55 "Figtree",system-ui,-apple-system,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:680px;margin:0 auto;padding:24px 16px 48px}
+  header.top{display:flex;align-items:center;gap:10px;margin-bottom:20px;color:var(--muted);font-size:14px;font-weight:600}
+  header.top svg{color:var(--heart)}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:28px 24px}
+  @media (min-width:560px){.card{padding:36px 36px}}
+  h1{font-size:28px;line-height:1.2;margin:0 0 8px;letter-spacing:-.01em}
+  h2{font-size:20px;line-height:1.35;margin:0 0 20px;font-weight:600}
+  p{margin:0 0 14px}
+  .lead{color:var(--muted)}
+  .meta{display:flex;flex-wrap:wrap;gap:8px 18px;margin:20px 0 26px;color:var(--muted);font-size:14px}
+  .meta span{display:inline-flex;align-items:center;gap:6px}
+  .btn{appearance:none;border:0;border-radius:10px;padding:13px 22px;font:inherit;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:8px;transition:transform .08s ease,opacity .15s ease,background .15s ease}
+  .btn:active{transform:translateY(1px)}
+  .btn-primary{background:var(--accent);color:var(--accent-ink)}
+  .btn-primary:disabled{opacity:.4;cursor:not-allowed}
+  .btn-ghost{background:transparent;color:var(--muted)}
+  .btn-ghost:hover{color:var(--ink)}
+  .btn:focus-visible,.opt input:focus-visible+span{outline:3px solid var(--accent);outline-offset:2px}
+  .progress{height:6px;background:var(--line);border-radius:99px;overflow:hidden;margin-bottom:18px}
+  .progress i{display:block;height:100%;background:var(--accent);border-radius:99px;transition:width .3s ease}
+  .qhead{display:flex;justify-content:space-between;gap:12px;font-size:13px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.04em;margin-bottom:10px}
+  .opts{display:grid;gap:10px;margin:0;padding:0;border:0}
+  .opt{position:relative;display:block;cursor:pointer}
+  .opt input{position:absolute;opacity:0;pointer-events:none}
+  .opt span{display:flex;gap:12px;align-items:flex-start;padding:14px 16px;border:1.5px solid var(--line);border-radius:12px;transition:border-color .15s,background .15s}
+  .opt span b{flex:0 0 26px;height:26px;border-radius:50%;border:1.5px solid var(--line);display:grid;place-items:center;font-size:13px;color:var(--muted);transition:all .15s}
+  .opt:hover span{border-color:var(--muted)}
+  .opt input:checked+span{border-color:var(--accent);background:var(--accent-soft)}
+  .opt input:checked+span b{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+  .nav{display:flex;justify-content:space-between;align-items:center;margin-top:26px;gap:12px}
+  .hint{font-size:13px;color:var(--muted);margin-top:14px}
+  .score{display:flex;align-items:center;gap:18px;padding:18px;border-radius:12px;background:var(--accent-soft);margin:18px 0 26px}
+  .score strong{font-size:36px;line-height:1;flex:0 0 auto}
+  @media (max-width:420px){.score{flex-direction:column;align-items:flex-start;gap:8px}}
+  .review{display:grid;gap:14px}
+  .rev{border:1px solid var(--line);border-radius:12px;padding:16px}
+  .rev h3{font-size:15px;margin:0 0 10px;font-weight:600;line-height:1.4}
+  .tag{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;padding:3px 9px;border-radius:99px;margin-bottom:8px}
+  .tag.ok{background:var(--ok-soft);color:var(--ok)} .tag.bad{background:var(--bad-soft);color:var(--bad)}
+  .rev p{font-size:14px;margin:6px 0 0}
+  .rev .why{color:var(--muted)}
+  .rev-bad{border-color:var(--bad)}
+  .ans{border-radius:10px;padding:10px 12px;margin-top:10px}
+  .ans p{margin:0 0 4px}
+  .ans p:last-child{margin-bottom:0}
+  .ans-bad{background:var(--bad-soft)} .ans-bad strong{color:var(--bad)}
+  .ans-ok{background:var(--ok-soft)} .ans-ok strong{color:var(--ok)}
+  .tip{display:flex;gap:10px;align-items:flex-start;font-size:14px;margin:12px 0 0;padding:10px 12px;border:1px dashed var(--line);border-radius:10px}
+  .tip svg{flex:0 0 auto;color:var(--accent);margin-top:1px}
+  .practice-cta{margin:20px 0 8px;padding:18px;border-radius:12px;border:1.5px solid var(--accent)}
+  .practice-cta p{font-size:15px}
+  .rights{margin-top:26px}
+  .rights summary{cursor:pointer;font-weight:600;font-size:18px;margin-bottom:14px}
+  .opt.is-ok input+span{border-color:var(--ok);background:var(--ok-soft)}
+  .opt.is-ok input+span b{background:var(--ok);border-color:var(--ok);color:var(--accent-ink)}
+  .opt.is-bad input+span{border-color:var(--bad);background:var(--bad-soft)}
+  .opt.is-bad input+span b{background:var(--bad);border-color:var(--bad);color:#fff}
+  .opt input:disabled+span{cursor:default}
+  .foot{font-size:12px;color:var(--muted);margin-top:22px;text-align:center}
+  .hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
+  .err{color:var(--bad);font-size:14px;margin-top:12px}
+  [hidden]{display:none!important}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/><path d="M3.22 12H9.5l.5-1 2 4.5 2-7 1.5 3.5h5.27"/></svg>
+    Día Europeo del Paro Cardíaco · 16 de octubre
+  </header>
+
+  <main class="card" id="app" aria-live="polite"></main>
+
+  <p class="foot">Encuesta anónima con fines formativos. Basada en las recomendaciones del Consejo Europeo de Resucitación (ERC).</p>
+</div>
+
+<script src="config.js"></script>
+<script src="preguntas.js"></script>
+<script>
+const CONFIG = window.ENCUESTA_CONFIG;
+const KNOWLEDGE = QUESTIONS.filter(q => q.correct);
+const LETTERS = ['A','B','C','D','E','F'];
+const DONE_KEY = 'encuesta_rcp_enviada_v' + CONFIG.SURVEY_VERSION;
+const LOCAL_KEY = 'encuesta_rcp_local';
+
+const app = document.getElementById('app');
+const state = { step: -1, answers: {} };
+
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const icon = {
+  clock:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>',
+  shield:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/></svg>',
+  list:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>',
+  arrow:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>',
+  back:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>',
+  check:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>',
+  repeat:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>',
+  bulb:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6M10 22h4"/></svg>',
+  x:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>'
+};
+
+function alreadySent(){ try { return localStorage.getItem(DONE_KEY) === '1'; } catch(e){ return false; } }
+
+function renderIntro(){
+  if (alreadySent()){
+    app.innerHTML = `<h1>Ya has respondido</h1>
+      <p class="lead">Tus respuestas se registraron correctamente en este dispositivo. Gracias por participar.</p>`;
+    return;
+  }
+  app.innerHTML = `
+    <h1>Encuesta de conocimientos en RCP, DEA y 112</h1>
+    <p class="lead">Dirigida al colectivo de Técnicos en Cuidados Auxiliares de Enfermería (TCAE).</p>
+    <p>Queremos conocer el nivel de formación del colectivo en soporte vital básico, uso del desfibrilador (DEA) y activación del 112, en conmemoración del Día Europeo del Paro Cardíaco. Al terminar verás tus aciertos y la explicación de cada respuesta.</p>
+    <div class="meta">
+      <span>${icon.list} ${QUESTIONS.length} preguntas</span>
+      <span>${icon.clock} Unos 5 minutos</span>
+      <span>${icon.shield} Anónima: no pedimos nombre, email ni datos personales</span>
+    </div>
+    <button class="btn btn-primary" id="start">Empezar ${icon.arrow}</button>`;
+  document.getElementById('start').onclick = () => go(0);
+}
+
+function renderQuestion(){
+  const i = state.step, q = QUESTIONS[i], last = i === QUESTIONS.length - 1;
+  const sel = state.answers[q.id];
+  const pct = Math.round((i / QUESTIONS.length) * 100);
+  app.innerHTML = `
+    <div class="progress" role="progressbar" aria-valuenow="${pct}" aria-valuemin="0" aria-valuemax="100"><i style="width:${pct}%"></i></div>
+    <div class="qhead"><span>${esc(q.block)}</span><span>${i + 1} de ${QUESTIONS.length}</span></div>
+    <form id="qform" novalidate>
+      <fieldset class="opts">
+        <legend><h2>${esc(q.text)}</h2></legend>
+        ${q.options.map(([v, t], k) => `
+          <label class="opt">
+            <input type="radio" name="opt" value="${esc(v)}" ${sel === v ? 'checked' : ''}>
+            <span><b>${q.correct ? LETTERS[k] : k + 1}</b><span style="padding:0;border:0">${esc(t)}</span></span>
+          </label>`).join('')}
+      </fieldset>
+      <input class="hp" type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
+      <div class="nav">
+        ${i > 0 ? `<button type="button" class="btn btn-ghost" id="prev">${icon.back} Atrás</button>` : '<span></span>'}
+        <button type="submit" class="btn btn-primary" id="next" ${sel ? '' : 'disabled'}>${last ? 'Enviar respuestas' : 'Siguiente'} ${icon.arrow}</button>
+      </div>
+      <p class="err" id="err" hidden></p>
+    </form>`;
+  const form = document.getElementById('qform');
+  form.addEventListener('change', e => {
+    if (e.target.name === 'opt'){ state.answers[q.id] = e.target.value; document.getElementById('next').disabled = false; }
+  });
+  form.addEventListener('submit', e => {
+    e.preventDefault();
+    if (!state.answers[q.id]) return;
+    if (last) submit(form.website.value); else go(i + 1);
+  });
+  const prev = document.getElementById('prev');
+  if (prev) prev.onclick = () => go(i - 1);
+}
+
+function go(step){
+  state.step = step;
+  renderQuestion();
+  window.scrollTo({ top: 0 });
+  const first = app.querySelector('input[name=opt]:checked') || app.querySelector('input[name=opt]');
+  if (first) first.focus({ preventScroll: true });
+}
+
+async function submit(honeypot){
+  const btn = document.getElementById('next'), err = document.getElementById('err');
+  btn.disabled = true; btn.textContent = 'Enviando...';
+  const score = KNOWLEDGE.filter(q => state.answers[q.id] === q.correct).length;
+  // Solo se guardan las respuestas, la puntuación y la versión. Nada que identifique a la persona.
+  const row = {
+    version: CONFIG.SURVEY_VERSION,
+    area: state.answers.area,
+    experiencia: state.answers.experiencia,
+    formacion: state.answers.formacion,
+    confianza: Number(state.answers.confianza),
+    respuestas: Object.fromEntries(KNOWLEDGE.map(q => [q.id, state.answers[q.id]])),
+    aciertos: score,
+    total: KNOWLEDGE.length
+  };
+  try {
+    if (!honeypot) await save(row);
+    try { localStorage.setItem(DONE_KEY, '1'); } catch(e){}
+    renderResult(score);
+  } catch(e){
+    btn.disabled = false; btn.innerHTML = `Reintentar envío ${icon.arrow}`;
+    err.hidden = false; err.textContent = 'No se han podido enviar las respuestas. Comprueba tu conexión e inténtalo de nuevo.';
+  }
+}
+
+async function save(row){
+  if (CONFIG.SUPABASE_URL && CONFIG.SUPABASE_KEY){
+    const res = await fetch(`${CONFIG.SUPABASE_URL}/rest/v1/${CONFIG.TABLE}`, {
+      method: 'POST',
+      headers: {
+        'apikey': CONFIG.SUPABASE_KEY,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=minimal'
+      },
+      body: JSON.stringify(row)
+    });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    return;
+  }
+  // Modo prueba: sin backend configurado, se guarda en este navegador.
+  try {
+    const list = JSON.parse(localStorage.getItem(LOCAL_KEY) || '[]');
+    list.push({ ...row, created_at: new Date().toISOString() });
+    localStorage.setItem(LOCAL_KEY, JSON.stringify(list));
+  } catch(e){ console.warn('Modo prueba sin almacenamiento local', row); }
+}
+
+function renderResult(score){
+  const total = KNOWLEDGE.length;
+  const msg = score === total ? 'Perfecto. Dominas los pasos clave del soporte vital básico.'
+    : score >= total * 0.7 ? 'Buen nivel. Revisa las respuestas marcadas para afianzar conocimientos.'
+    : 'Te recomendamos repasar estos contenidos y realizar una formación práctica en RCP y DEA.';
+  const wrong = KNOWLEDGE.filter(q => state.answers[q.id] !== q.correct);
+  const right = KNOWLEDGE.filter(q => state.answers[q.id] === q.correct);
+  state.wrongIds = wrong.map(q => q.id);
+  app.innerHTML = `
+    <h1>Gracias por participar</h1>
+    <p class="lead">Tus respuestas se han registrado de forma anónima.</p>
+    <div class="score"><strong>${score}/${total}</strong><span>${msg}</span></div>
+    ${wrong.length ? `
+      <h2>Aprende de tus fallos (${wrong.length})</h2>
+      <div class="review">${wrong.map(q => learnCard(q, state.answers[q.id])).join('')}</div>
+      <div class="practice-cta">
+        <p><strong>Practica hasta acertarlas todas.</strong> Te volveremos a plantear las preguntas falladas y se repetirán hasta que las respondas bien. Esta práctica no se guarda.</p>
+        <button class="btn btn-primary" id="practice">${icon.repeat} Repasar mis fallos</button>
+      </div>` : ''}
+    ${right.length ? `
+      <details class="rights" ${wrong.length ? '' : 'open'}>
+        <summary>Tus aciertos (${right.length})</summary>
+        <div class="review">${right.map(q => learnCard(q, state.answers[q.id])).join('')}</div>
+      </details>` : ''}`;
+  const p = document.getElementById('practice');
+  if (p) p.onclick = startPractice;
+  window.scrollTo({ top: 0 });
+}
+
+const optText = (q, v) => q.options.find(o => o[0] === v)[1];
+const optLetter = (q, v) => LETTERS[q.options.findIndex(o => o[0] === v)];
+
+function learnCard(q, given){
+  const ok = given === q.correct, L = LEARN[q.id] || {};
+  return `<div class="rev ${ok ? '' : 'rev-bad'}">
+    <span class="tag ${ok ? 'ok' : 'bad'}">${ok ? icon.check + ' Correcta' : icon.x + ' Incorrecta'}</span>
+    <h3>${esc(q.text)}</h3>
+    ${ok ? '' : `<div class="ans ans-bad"><p><strong>Tu respuesta: ${optLetter(q, given)}) ${esc(optText(q, given))}</strong></p>
+      <p>Por qué no es correcta: ${esc(L.bad?.[given] || '')}</p></div>`}
+    <div class="ans ans-ok"><p><strong>Respuesta correcta: ${optLetter(q, q.correct)}) ${esc(optText(q, q.correct))}</strong></p>
+      <p>${esc(q.why)}</p></div>
+    ${!ok && L.tip ? `<p class="tip">${icon.bulb}<span><strong>Recuerda:</strong> ${esc(L.tip)}</span></p>` : ''}
+  </div>`;
+}
+
+/* Repaso de fallos: las preguntas falladas vuelven a la cola hasta acertarlas. No se guarda nada. */
+function startPractice(){
+  state.practice = { queue: [...state.wrongIds], attempts: 0, fixed: 0, total: state.wrongIds.length };
+  renderPractice();
+}
+
+function renderPractice(){
+  const pr = state.practice;
+  if (!pr.queue.length){
+    app.innerHTML = `
+      <h1>Has corregido todos tus fallos</h1>
+      <p class="lead">Has repasado ${pr.total} ${pr.total === 1 ? 'pregunta' : 'preguntas'} en ${pr.attempts} ${pr.attempts === 1 ? 'intento' : 'intentos'}.</p>
+      <p>Recuerda que la mejor forma de afianzar lo aprendido es la práctica con maniquí. Pregunta en tu centro por la próxima formación en RCP y DEA.</p>
+      <div class="nav"><button class="btn btn-ghost" id="back">${icon.back} Ver mis resultados</button>
+      <button class="btn btn-primary" id="again">${icon.repeat} Repasar otra vez</button></div>`;
+    document.getElementById('back').onclick = () => renderResult(KNOWLEDGE.length - state.wrongIds.length);
+    document.getElementById('again').onclick = startPractice;
+    window.scrollTo({ top: 0 });
+    return;
+  }
+  const q = QUESTIONS.find(x => x.id === pr.queue[0]);
+  const pct = Math.round((pr.fixed / pr.total) * 100);
+  app.innerHTML = `
+    <div class="progress" role="progressbar" aria-valuenow="${pct}" aria-valuemin="0" aria-valuemax="100"><i style="width:${pct}%"></i></div>
+    <div class="qhead"><span>Repaso de fallos</span><span>${pr.fixed} de ${pr.total} corregidas</span></div>
+    <fieldset class="opts" id="popts">
+      <legend><h2>${esc(q.text)}</h2></legend>
+      ${q.options.map(([v, t], k) => `
+        <label class="opt"><input type="radio" name="opt" value="${esc(v)}">
+          <span><b>${LETTERS[k]}</b><span style="padding:0;border:0">${esc(t)}</span></span></label>`).join('')}
+    </fieldset>
+    <div id="feedback"></div>`;
+  window.scrollTo({ top: 0 });
+  document.getElementById('popts').addEventListener('change', e => {
+    const given = e.target.value, ok = given === q.correct;
+    pr.attempts++;
+    pr.queue.shift();
+    if (ok) pr.fixed++; else pr.queue.push(q.id);
+    app.querySelectorAll('input[name=opt]').forEach(i => {
+      i.disabled = true;
+      const lab = i.closest('.opt');
+      if (i.value === q.correct) lab.classList.add('is-ok');
+      else if (i.value === given) lab.classList.add('is-bad');
+    });
+    const L = LEARN[q.id] || {};
+    document.getElementById('feedback').innerHTML = `
+      <div class="ans ${ok ? 'ans-ok' : 'ans-bad'}" style="margin-top:18px">
+        <p><strong>${ok ? 'Correcto.' : 'Todavía no. Esta pregunta volverá a salir.'}</strong></p>
+        ${ok ? `<p>${esc(q.why)}</p>` : `<p>${esc(L.bad?.[given] || '')}</p><p>${esc(q.why)}</p>`}
+      </div>
+      ${L.tip ? `<p class="tip">${icon.bulb}<span><strong>Recuerda:</strong> ${esc(L.tip)}</span></p>` : ''}
+      <div class="nav"><span></span><button class="btn btn-primary" id="pnext">${pr.queue.length ? 'Siguiente' : 'Terminar'} ${icon.arrow}</button></div>`;
+    document.getElementById('pnext').onclick = renderPractice;
+    document.getElementById('pnext').focus({ preventScroll: true });
+  });
+}
+
+renderIntro();
+</script>
+</body>
+</html>

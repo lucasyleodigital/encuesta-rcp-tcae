@@ -1,0 +1,453 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Resultados encuesta RCP</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<style>
+  :root{
+    --bg:#f4f6f5; --card:#ffffff; --ink:#14201b; --ink2:#3a4a43; --muted:#5b6b64; --line:#dde4e0; --grid:#e9eeeb;
+    --accent:#0b7a55; --accent-ink:#ffffff; --accent-soft:#e3f2ec;
+    --bad:#b4232e; --bad-soft:#fbe9ea; --warn:#9a6100; --warn-soft:#fdf3e1;
+    --radius:14px; --shadow:0 1px 2px rgba(20,32,27,.05),0 6px 18px rgba(20,32,27,.05);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#0f1513; --card:#17201d; --ink:#e7eeea; --ink2:#c3cfc9; --muted:#9aaba3; --line:#2a3631; --grid:#222c28;
+      --accent:#3cc292; --accent-ink:#06120d; --accent-soft:#16332a;
+      --bad:#ef6670; --bad-soft:#3a1a1d; --warn:#e9b04a; --warn-soft:#352a12; --shadow:none;
+    }
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{background:var(--bg);color:var(--ink);font:15px/1.5 "Figtree",system-ui,-apple-system,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1180px;margin:0 auto;padding:24px 16px 56px}
+  h1{font-size:24px;margin:0;letter-spacing:-.01em}
+  h2{font-size:16px;margin:0 0 4px;font-weight:600}
+  .sub{color:var(--muted);font-size:13px;margin:0 0 14px}
+  .top{display:flex;flex-wrap:wrap;gap:12px 20px;align-items:center;justify-content:space-between;margin-bottom:18px}
+  .top p{margin:2px 0 0;color:var(--muted);font-size:14px}
+  .actions{display:flex;flex-wrap:wrap;gap:8px}
+  .btn{appearance:none;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:9px;padding:8px 13px;font:inherit;font-size:14px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:7px}
+  .btn:hover{border-color:var(--muted)}
+  .btn-primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+  .btn:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+  .banner{background:var(--warn-soft);color:var(--ink);border:1px solid var(--warn);border-radius:10px;padding:10px 14px;font-size:14px;margin-bottom:16px;display:flex;gap:10px;align-items:flex-start}
+  .banner svg{color:var(--warn);flex:0 0 auto;margin-top:2px}
+  .filters{display:flex;flex-wrap:wrap;gap:10px;align-items:end;margin-bottom:18px}
+  .filters label{display:grid;gap:4px;font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+  select,input{font:inherit;font-size:14px;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:9px;padding:8px 10px;min-width:180px}
+  .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin-bottom:16px}
+  .kpi{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:16px 18px;box-shadow:var(--shadow)}
+  .kpi span{display:block;font-size:13px;color:var(--muted);font-weight:500}
+  .kpi strong{display:block;font-size:30px;line-height:1.15;margin-top:6px;font-variant-numeric:tabular-nums}
+  .kpi small{display:block;color:var(--muted);font-size:12px;margin-top:2px}
+  .grid{display:grid;grid-template-columns:repeat(12,1fr);gap:12px}
+  .panel{grid-column:span 12;background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:18px;box-shadow:var(--shadow);min-width:0}
+  @media (min-width:900px){.s6{grid-column:span 6}.s4{grid-column:span 4}.s8{grid-column:span 8}}
+  .chart{position:relative;height:260px}
+  .chart.tall{height:400px}
+  .insights{margin:0;padding:0;list-style:none;display:grid;gap:10px}
+  .insights li{display:flex;gap:10px;align-items:flex-start;font-size:14px;color:var(--ink2)}
+  .insights li svg{flex:0 0 auto;margin-top:2px;color:var(--accent)}
+  .insights li.alert svg{color:var(--bad)}
+  .table-wrap{overflow-x:auto}
+  table{width:100%;border-collapse:collapse;font-size:13.5px;font-variant-numeric:tabular-nums}
+  th,td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{font-size:12px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.03em;white-space:nowrap}
+  td.num,th.num{text-align:right}
+  td.ok{color:var(--accent);font-weight:700}
+  .pill{display:inline-block;font-size:12px;font-weight:600;padding:2px 8px;border-radius:99px}
+  .pill.bad{background:var(--bad-soft);color:var(--bad)} .pill.ok{background:var(--accent-soft);color:var(--accent)} .pill.mid{background:var(--warn-soft);color:var(--warn)}
+  .legend-note{display:flex;gap:16px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin:0 0 10px}
+  .legend-note i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+  .login{max-width:380px;margin:10vh auto 0;background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:28px;box-shadow:var(--shadow)}
+  .login form{display:grid;gap:12px;margin-top:16px}
+  .login input{width:100%;min-width:0}
+  .err{color:var(--bad);font-size:14px;margin:0}
+  .empty{padding:40px 10px;text-align:center;color:var(--muted)}
+  [hidden]{display:none!important}
+  @media print{
+    body{background:#fff}.actions,.filters,.banner{display:none!important}
+    .panel,.kpi{box-shadow:none;break-inside:avoid}
+  }
+</style>
+</head>
+<body>
+
+<section class="login" id="login" hidden>
+  <h1>Panel de resultados</h1>
+  <p class="sub">Encuesta RCP, DEA y 112 · acceso restringido</p>
+  <form id="loginForm">
+    <input type="email" name="email" placeholder="Email" autocomplete="username" required>
+    <input type="password" name="password" placeholder="Contraseña" autocomplete="current-password" required>
+    <button class="btn btn-primary" type="submit">Entrar</button>
+    <p class="err" id="loginErr" hidden></p>
+  </form>
+</section>
+
+<div class="wrap" id="dash" hidden>
+  <div class="banner" id="demoBanner" hidden>
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4M12 17h.01"/></svg>
+    <span><strong>Datos de ejemplo.</strong> Aún no hay conexión con Supabase (config.js vacío), así que el panel muestra 120 respuestas inventadas para ver cómo quedará.</span>
+  </div>
+
+  <header class="top">
+    <div>
+      <h1>Resultados · Encuesta RCP, DEA y 112</h1>
+      <p id="meta">Cargando...</p>
+    </div>
+    <div class="actions">
+      <button class="btn" id="reload">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>Actualizar</button>
+      <button class="btn" id="csv">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg>Exportar CSV</button>
+      <button class="btn" id="print">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 14h12v8H6z"/></svg>Imprimir / PDF</button>
+      <button class="btn" id="logout" hidden>Salir</button>
+    </div>
+  </header>
+
+  <div class="filters">
+    <label>Área<select id="fArea"></select></label>
+    <label>Experiencia<select id="fExp"></select></label>
+    <label>Última formación<select id="fForm"></select></label>
+  </div>
+
+  <div class="kpis" id="kpis"></div>
+
+  <div id="content" class="grid">
+    <section class="panel s6">
+      <h2>Conclusiones automáticas</h2>
+      <p class="sub">Necesidades formativas detectadas con las respuestas filtradas</p>
+      <ul class="insights" id="insights"></ul>
+    </section>
+    <section class="panel s6">
+      <h2>Distribución de notas</h2>
+      <p class="sub">Número de personas según aciertos sobre 11</p>
+      <div class="chart"><canvas id="cScores" aria-label="Distribución de notas"></canvas></div>
+    </section>
+
+    <section class="panel s8">
+      <h2>Porcentaje de acierto por pregunta</h2>
+      <div class="legend-note"><span><i style="background:var(--accent)"></i>50% o más</span><span><i style="background:var(--bad)"></i>Menos del 50%: prioridad formativa</span></div>
+      <div class="chart tall"><canvas id="cQuestions" aria-label="Acierto por pregunta"></canvas></div>
+    </section>
+    <section class="panel s4">
+      <h2>Nota media según última formación</h2>
+      <p class="sub">Aciertos medios sobre 11</p>
+      <div class="chart tall"><canvas id="cFormacion"></canvas></div>
+    </section>
+
+    <section class="panel s6">
+      <h2>Nota media por área de trabajo</h2>
+      <p class="sub">Aciertos medios sobre 11</p>
+      <div class="chart"><canvas id="cArea"></canvas></div>
+    </section>
+    <section class="panel s6">
+      <h2>Nota media por años de experiencia</h2>
+      <p class="sub">Aciertos medios sobre 11</p>
+      <div class="chart"><canvas id="cExp"></canvas></div>
+    </section>
+
+    <section class="panel s6">
+      <h2>Confianza declarada frente a nota real</h2>
+      <p class="sub">Nota media según cómo de preparado/a se siente cada persona (1 a 5)</p>
+      <div class="chart"><canvas id="cConf"></canvas></div>
+    </section>
+    <section class="panel s6">
+      <h2>Respuestas por día</h2>
+      <p class="sub">Participación acumulada en el periodo</p>
+      <div class="chart"><canvas id="cDays"></canvas></div>
+    </section>
+
+    <section class="panel s4">
+      <h2>Participantes por área</h2>
+      <div class="chart"><canvas id="pArea"></canvas></div>
+    </section>
+    <section class="panel s4">
+      <h2>Participantes por experiencia</h2>
+      <div class="chart"><canvas id="pExp"></canvas></div>
+    </section>
+    <section class="panel s4">
+      <h2>Participantes por última formación</h2>
+      <div class="chart"><canvas id="pForm"></canvas></div>
+    </section>
+
+    <section class="panel">
+      <h2>Detalle por pregunta</h2>
+      <p class="sub">Porcentaje de personas que eligió cada opción. La opción correcta aparece en verde.</p>
+      <div class="table-wrap"><table id="detail"></table></div>
+    </section>
+  </div>
+  <div class="empty" id="empty" hidden>Todavía no hay respuestas con estos filtros.</div>
+</div>
+
+<script src="config.js"></script>
+<script src="preguntas.js"></script>
+<script>
+const CONFIG = window.ENCUESTA_CONFIG;
+const KNOWLEDGE = QUESTIONS.filter(q => q.correct);
+const LETTERS = ['A','B','C','D'];
+const SHORT = { k1:'Seguridad de la escena', k2:'Valorar la respiración', k3:'Respiración agónica', k4:'Llamar al 112 y pedir DEA',
+  k5:'Datos al llamar al 112', k6:'Relación 30:2', k7:'Profundidad y ritmo', k8:'Al encender el DEA',
+  k9:'Nadie toca durante el análisis', k10:'Qué hacer tras la descarga', k11:'Día Europeo del Paro Cardíaco' };
+const PROFILE = Object.fromEntries(['area','experiencia','formacion'].map(id => [id, QUESTIONS.find(q => q.id === id).options]));
+const SHORT_AREA = { urgencias:'Urgencias', criticos:'UCI / Reanimación', planta:'Planta', primaria:'Atención Primaria', sociosanitario:'Sociosanitario', otros:'Otros' };
+const label = (field, v) => field === 'area' ? SHORT_AREA[v] : (PROFILE[field].find(o => o[0] === v) || [, v])[1];
+
+const hasBackend = !!(CONFIG.SUPABASE_URL && CONFIG.SUPABASE_KEY);
+const sb = hasBackend ? supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY) : null;
+let ALL = [], charts = [];
+
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+const fmt = (n, d = 1) => Number.isFinite(n) ? n.toLocaleString('es-ES', { minimumFractionDigits: d, maximumFractionDigits: d }) : '–';
+const mean = a => a.length ? a.reduce((s, x) => s + x, 0) / a.length : NaN;
+
+/* ---------- Datos ---------- */
+async function fetchAll(){
+  if (!hasBackend) return demoData();
+  const rows = [], page = 1000;
+  for (let from = 0; ; from += page){
+    const { data, error } = await sb.from(CONFIG.TABLE).select('*').order('created_at').range(from, from + page - 1);
+    if (error) throw error;
+    rows.push(...data);
+    if (data.length < page) break;
+  }
+  return rows;
+}
+
+function demoData(){
+  // Generador determinista para que el ejemplo no cambie en cada recarga.
+  let seed = 7; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+  const pick = arr => arr[Math.floor(rnd() * arr.length)];
+  const hard = { k2:.45, k3:.4, k10:.5, k9:.75, k6:.85, k11:.6 };
+  const formBoost = { '<1':.15, '1-2':.05, '>2':-.05, 'nunca':-.2 };
+  const rows = [], start = Date.now() - 9 * 864e5;
+  for (let i = 0; i < 120; i++){
+    const formacion = pick(['<1','<1','1-2','1-2','>2','>2','nunca']);
+    const r = { area: pick(['urgencias','criticos','planta','planta','primaria','sociosanitario','otros']),
+      experiencia: pick(['<2','2-5','6-10','>10','>10']), formacion, respuestas:{} };
+    let ok = 0;
+    for (const q of KNOWLEDGE){
+      const p = Math.min(.97, Math.max(.1, (hard[q.id] ?? .8) + formBoost[formacion]));
+      const right = rnd() < p;
+      const wrongs = q.options.map(o => o[0]).filter(v => v !== q.correct);
+      r.respuestas[q.id] = right ? q.correct : (rnd() < .6 ? wrongs[0] : pick(wrongs));
+      if (right) ok++;
+    }
+    r.aciertos = ok; r.total = 11;
+    r.confianza = Math.min(5, Math.max(1, Math.round(2 + rnd() * 2.6 + (formacion === '<1' ? .6 : 0))));
+    r.created_at = new Date(start + Math.pow(rnd(), .6) * 9 * 864e5).toISOString();
+    rows.push(r);
+  }
+  return rows.sort((a, b) => a.created_at.localeCompare(b.created_at));
+}
+
+/* ---------- Filtros ---------- */
+function fillFilters(){
+  const opt = (sel, field) => {
+    sel.innerHTML = '<option value="">Todas</option>' + PROFILE[field].map(([v]) => `<option value="${esc(v)}">${esc(label(field, v))}</option>`).join('');
+    sel.onchange = render;
+  };
+  opt($('fArea'), 'area'); opt($('fExp'), 'experiencia'); opt($('fForm'), 'formacion');
+}
+const filtered = () => ALL.filter(r =>
+  (!$('fArea').value || r.area === $('fArea').value) &&
+  (!$('fExp').value || r.experiencia === $('fExp').value) &&
+  (!$('fForm').value || r.formacion === $('fForm').value));
+
+/* ---------- Gráficos ---------- */
+function baseOpts(extra = {}){
+  const ink = css('--muted'), grid = css('--grid');
+  return Object.assign({
+    responsive: true, maintainAspectRatio: false, animation: { duration: 300 },
+    plugins: { legend: { display: false },
+      tooltip: { backgroundColor: css('--card'), titleColor: css('--ink'), bodyColor: css('--ink2'), borderColor: css('--line'), borderWidth: 1, padding: 10, displayColors: false } },
+    scales: {
+      x: { grid: { display: false }, border: { color: css('--line') }, ticks: { color: ink, font: { family: 'Figtree' } } },
+      y: { grid: { color: grid }, border: { display: false }, ticks: { color: ink, font: { family: 'Figtree' } }, beginAtZero: true }
+    }
+  }, extra);
+}
+function bar(id, labels, values, { horizontal = false, max, colors, tip, suffix = '' } = {}){
+  const o = baseOpts({ indexAxis: horizontal ? 'y' : 'x' });
+  const valAxis = horizontal ? 'x' : 'y', catAxis = horizontal ? 'y' : 'x';
+  if (horizontal){ o.scales.x.grid = { color: css('--grid') }; o.scales.y.grid = { display: false }; o.scales.x.border = { display: false }; o.scales.y.border = { color: css('--line') }; }
+  if (max != null) o.scales[valAxis].max = max;
+  o.scales[valAxis].ticks.callback = v => v + suffix;
+  o.scales[catAxis].ticks.autoSkip = false;
+  if (tip) o.plugins.tooltip.callbacks = { label: tip };
+  charts.push(new Chart($(id), { type: 'bar', options: o, data: { labels, datasets: [{
+    data: values, backgroundColor: colors || css('--accent'), borderRadius: 4, borderSkipped: 'start',
+    maxBarThickness: horizontal ? 22 : 44, categoryPercentage: .8, barPercentage: .9 }] } }));
+}
+
+function groupMean(rows, field){
+  return PROFILE[field].map(([v]) => {
+    const g = rows.filter(r => r[field] === v);
+    return { v, n: g.length, m: mean(g.map(r => r.aciertos)) };
+  });
+}
+
+/* ---------- Render ---------- */
+function render(){
+  charts.forEach(c => c.destroy()); charts = [];
+  const rows = filtered(), n = rows.length;
+  $('meta').textContent = `${ALL.length} respuestas en total · ${n} con los filtros actuales` +
+    (ALL.length ? ` · última: ${new Date(ALL[ALL.length - 1].created_at).toLocaleString('es-ES', { dateStyle: 'medium', timeStyle: 'short' })}` : '');
+  $('content').hidden = n === 0; $('empty').hidden = n > 0;
+  $('empty').textContent = ALL.length ? 'Todavía no hay respuestas con estos filtros.'
+    : 'No se ve ninguna respuesta. Si ya hay envíos, revisa que tu email esté en la tabla panel_admins de Supabase.';
+
+  const avg = mean(rows.map(r => r.aciertos));
+  const good = rows.filter(r => r.aciertos >= 8).length;
+  const stale = rows.filter(r => r.formacion === '>2' || r.formacion === 'nunca').length;
+  const conf = mean(rows.map(r => r.confianza));
+  const pct = (a, b) => b ? fmt(a / b * 100, 0) + '%' : '–';
+  $('kpis').innerHTML = [
+    ['Respuestas', n.toLocaleString('es-ES'), 'personas participantes'],
+    ['Nota media', `${fmt(avg)}<small style="display:inline;font-size:16px"> / 11</small>`, pct(avg, 11) + ' de acierto'],
+    ['Nivel adecuado', pct(good, n), '8 o más aciertos sobre 11'],
+    ['Formación desactualizada', pct(stale, n), 'hace más de 2 años o nunca'],
+    ['Confianza media', `${fmt(conf)}<small style="display:inline;font-size:16px"> / 5</small>`, 'cómo de preparado/a se siente']
+  ].map(([t, v, s]) => `<div class="kpi"><span>${t}</span><strong>${v}</strong><small>${s}</small></div>`).join('');
+  if (!n){ $('insights').innerHTML = ''; return; }
+
+  // Acierto por pregunta (ordenado de peor a mejor)
+  const perQ = KNOWLEDGE.map(q => {
+    const counts = Object.fromEntries(q.options.map(o => [o[0], 0]));
+    rows.forEach(r => { const a = r.respuestas?.[q.id]; if (a in counts) counts[a]++; });
+    const okPct = counts[q.correct] / n * 100;
+    const wrongTop = Object.entries(counts).filter(([v]) => v !== q.correct).sort((a, b) => b[1] - a[1])[0];
+    return { q, counts, okPct, wrongTop };
+  });
+  const sorted = [...perQ].sort((a, b) => a.okPct - b.okPct);
+  bar('cQuestions', sorted.map(x => SHORT[x.q.id]), sorted.map(x => +x.okPct.toFixed(1)), {
+    horizontal: true, max: 100, suffix: '%',
+    colors: sorted.map(x => x.okPct < 50 ? css('--bad') : css('--accent')),
+    tip: c => ` ${fmt(c.raw, 0)}% de acierto (${sorted[c.dataIndex].counts[sorted[c.dataIndex].q.correct]} de ${n})` });
+
+  // Distribución de notas
+  const dist = Array.from({ length: 12 }, (_, k) => rows.filter(r => r.aciertos === k).length);
+  bar('cScores', dist.map((_, k) => String(k)), dist, {
+    colors: dist.map((_, k) => k >= 8 ? css('--accent') : css('--muted')),
+    tip: c => ` ${c.raw} ${c.raw === 1 ? 'persona' : 'personas'} con ${c.label}/11` });
+
+  const meanBar = (id, field, horizontal = false) => {
+    const g = groupMean(rows, field).filter(x => x.n);
+    bar(id, g.map(x => label(field, x.v)), g.map(x => +x.m.toFixed(2)), { horizontal, max: 11,
+      tip: c => ` ${fmt(c.raw)} / 11 de media (${g[c.dataIndex].n} ${g[c.dataIndex].n === 1 ? 'persona' : 'personas'})` });
+  };
+  meanBar('cFormacion', 'formacion');
+  meanBar('cArea', 'area', true);
+  meanBar('cExp', 'experiencia');
+
+  // Confianza vs nota
+  const cg = [1,2,3,4,5].map(k => { const g = rows.filter(r => r.confianza === k); return { k, n: g.length, m: mean(g.map(r => r.aciertos)) }; });
+  bar('cConf', cg.map(x => `Confianza ${x.k}`), cg.map(x => x.n ? +x.m.toFixed(2) : null), { max: 11,
+    tip: c => ` ${fmt(c.raw)} / 11 de media (${cg[c.dataIndex].n} personas)` });
+
+  // Respuestas por día
+  const byDay = {};
+  rows.forEach(r => { const d = r.created_at.slice(0, 10); byDay[d] = (byDay[d] || 0) + 1; });
+  const days = Object.keys(byDay).sort();
+  const o = baseOpts(); o.interaction = { mode: 'index', intersect: false };
+  o.plugins.tooltip.callbacks = { label: c => ` ${c.raw} ${c.raw === 1 ? 'respuesta' : 'respuestas'}` };
+  charts.push(new Chart($('cDays'), { type: 'line', options: o, data: {
+    labels: days.map(d => new Date(d + 'T12:00').toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })),
+    datasets: [{ data: days.map(d => byDay[d]), borderColor: css('--accent'), backgroundColor: css('--accent'), borderWidth: 2, pointRadius: 4, pointHoverRadius: 6, tension: .25 }] } }));
+
+  // Perfil
+  const countBar = (id, field) => {
+    const g = PROFILE[field].map(([v]) => ({ v, n: rows.filter(r => r[field] === v).length }));
+    bar(id, g.map(x => label(field, x.v)), g.map(x => x.n), { horizontal: true,
+      tip: c => ` ${c.raw} ${c.raw === 1 ? 'persona' : 'personas'} (${fmt(c.raw / n * 100, 0)}%)` });
+  };
+  countBar('pArea', 'area'); countBar('pExp', 'experiencia'); countBar('pForm', 'formacion');
+
+  // Conclusiones
+  const ico = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>';
+  const alertIco = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4M12 17h.01"/></svg>';
+  const ins = [];
+  const weak = sorted.filter(x => x.okPct < 50);
+  const worst = sorted[0];
+  const wrongText = x => x.q.options.find(o => o[0] === x.wrongTop[0])[1];
+  ins.push(['alert', `El tema con más fallos es <strong>${esc(SHORT[worst.q.id])}</strong>: solo acierta el ${fmt(worst.okPct, 0)}%. El error más repetido (${fmt(worst.wrongTop[1] / n * 100, 0)}%) es: “${esc(wrongText(worst))}”`]);
+  if (weak.length > 1) ins.push(['alert', `${weak.length} preguntas no llegan al 50% de acierto: ${weak.map(x => esc(SHORT[x.q.id])).join(', ')}.`]);
+  const recentRows = rows.filter(r => r.formacion === '<1'), staleRows = rows.filter(r => r.formacion === '>2' || r.formacion === 'nunca');
+  if (recentRows.length >= 3 && staleRows.length >= 3) ins.push(['', `Quien se formó en el último año saca ${fmt(mean(recentRows.map(r => r.aciertos)))} de media frente a ${fmt(mean(staleRows.map(r => r.aciertos)))} de quien lleva más de 2 años o nunca se ha formado.`]);
+  ins.push([stale / n > .3 ? 'alert' : '', `El ${pct(stale, n)} no ha hecho formación práctica en los últimos 2 años o nunca la ha hecho.`]);
+  const hiConf = rows.filter(r => r.confianza >= 4), hiConfLow = hiConf.filter(r => r.aciertos < 8);
+  if (hiConf.length >= 3) ins.push([hiConfLow.length / hiConf.length > .3 ? 'alert' : '', `De quienes se sienten bastante o totalmente preparados/as, el ${pct(hiConfLow.length, hiConf.length)} no llega a 8 aciertos.`]);
+  $('insights').innerHTML = ins.map(([c, t]) => `<li class="${c}">${c === 'alert' ? alertIco : ico}<span>${t}</span></li>`).join('');
+
+  // Tabla detalle
+  $('detail').innerHTML = `<thead><tr><th>Pregunta</th>${LETTERS.map(l => `<th class="num">${l}</th>`).join('')}<th class="num">Acierto</th></tr></thead><tbody>` +
+    perQ.map(x => {
+      const p = x.okPct, cls = p < 50 ? 'bad' : p < 75 ? 'mid' : 'ok';
+      return `<tr><td><strong>${esc(SHORT[x.q.id])}</strong><br><span style="color:var(--muted)">${esc(x.q.text)}</span></td>` +
+        x.q.options.map(([v, t]) => `<td class="num ${v === x.q.correct ? 'ok' : ''}" title="${esc(t)}">${fmt(x.counts[v] / n * 100, 0)}%</td>`).join('') +
+        `<td class="num"><span class="pill ${cls}">${fmt(p, 0)}%</span></td></tr>`;
+    }).join('') + '</tbody>';
+}
+
+/* ---------- CSV ---------- */
+function exportCsv(){
+  const head = ['fecha','area','experiencia','formacion','confianza', ...KNOWLEDGE.map(q => q.id), 'aciertos','total'];
+  const lines = [head.join(';')].concat(filtered().map(r => [
+    r.created_at, label('area', r.area), label('experiencia', r.experiencia), label('formacion', r.formacion), r.confianza,
+    ...KNOWLEDGE.map(q => (r.respuestas?.[q.id] || '').toUpperCase()), r.aciertos, r.total
+  ].map(v => `"${String(v ?? '').replace(/"/g, '""')}"`).join(';')));
+  const blob = new Blob(['﻿' + lines.join('\r\n')], { type: 'text/csv;charset=utf-8' });
+  const a = Object.assign(document.createElement('a'), { href: URL.createObjectURL(blob), download: `encuesta-rcp-${new Date().toISOString().slice(0, 10)}.csv` });
+  a.click(); URL.revokeObjectURL(a.href);
+}
+
+/* ---------- Arranque ---------- */
+async function load(){
+  try { ALL = await fetchAll(); render(); }
+  catch(e){ $('meta').textContent = 'No se han podido cargar las respuestas: ' + (e.message || e); }
+}
+async function showDash(){
+  $('login').hidden = true; $('dash').hidden = false;
+  $('demoBanner').hidden = hasBackend; $('logout').hidden = !hasBackend;
+  fillFilters(); await load();
+}
+
+$('reload').onclick = load;
+$('csv').onclick = exportCsv;
+$('print').onclick = () => window.print();
+$('logout').onclick = async () => { await sb.auth.signOut(); location.reload(); };
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => ALL.length && render());
+
+(async () => {
+  if (!hasBackend) return showDash();
+  const { data } = await sb.auth.getSession();
+  if (data.session) return showDash();
+  $('login').hidden = false;
+  $('loginForm').onsubmit = async e => {
+    e.preventDefault();
+    const f = e.target, err = $('loginErr');
+    err.hidden = true;
+    const { error } = await sb.auth.signInWithPassword({ email: f.email.value, password: f.password.value });
+    if (error){
+      err.textContent = /not confirmed/i.test(error.message) ? 'El email no está confirmado. En Supabase > Authentication > Users, confirma este usuario.'
+        : /invalid login/i.test(error.message) ? 'Email o contraseña incorrectos. Usa el usuario creado en Supabase > Authentication > Users (no tu cuenta de supabase.com).'
+        : 'No se ha podido entrar: ' + error.message;
+      err.hidden = false; return;
+    }
+    showDash();
+  };
+})();
+</script>
+</body>
+</html>
