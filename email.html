@@ -54,6 +54,18 @@
         <li>Pon los destinatarios en <strong>CCO</strong> para que nadie vea los emails de los demás.</li>
       </ol>
     </div>
+
+    <div class="box">
+      <label>Si usas Webmail (Roundcube, cPanel, correo del dominio)</label>
+      <p style="margin:0 0 12px;font-size:14px">El Webmail escribe en texto plano por defecto y quita el botón al pegar. Hazlo así:</p>
+      <ol style="margin-top:0">
+        <li>Pulsa <strong>Copiar código HTML</strong>.</li>
+        <li>En Webmail abre <strong>Redactar</strong>. Encima del cuerpo del mensaje, cambia el editor a <strong>HTML</strong> (en Roundcube: icono o desplegable «Tipo de editor», o en <em>Configuración &gt; Preferencias &gt; Redactar mensajes &gt; Componer mensajes en HTML: siempre</em>).</li>
+        <li>En la barra del editor pulsa el botón <strong>&lt;&gt; Código fuente</strong>.</li>
+        <li>Borra lo que haya, pega con <strong>Ctrl + V</strong> y pulsa <strong>Guardar / Aceptar</strong>. Ya verás el email con el botón.</li>
+      </ol>
+      <button class="btn btn-primary" id="copyCode" style="margin-top:8px">Copiar código HTML</button>
+    </div>
   </div>
 
   <p class="preview-title">Vista previa</p>
@@ -128,6 +140,16 @@ $('copySubject').onclick = async () => {
   try { await navigator.clipboard.writeText($('subject').value); }
   catch(e){ $('subject').select(); document.execCommand('copy'); }
   flash($('copySubject'), 'Copiado');
+};
+
+$('copyCode').onclick = async () => {
+  const html = `<div style="background:#f4f6f5">${$('email').innerHTML}</div>`;
+  try { await navigator.clipboard.writeText(html); }
+  catch(e){
+    const t = Object.assign(document.createElement('textarea'), { value: html });
+    document.body.appendChild(t); t.select(); document.execCommand('copy'); t.remove();
+  }
+  flash($('copyCode'), 'Código copiado. Pégalo en «Código fuente»');
 };
 
 $('copyEmail').onclick = async () => {
