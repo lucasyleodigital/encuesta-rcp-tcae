@@ -74,9 +74,24 @@
   .err{color:var(--bad);font-size:14px;margin:0}
   .empty{padding:40px 10px;text-align:center;color:var(--muted)}
   [hidden]{display:none!important}
+  .print-img{display:none;width:100%;height:auto}
+  @page{size:A4;margin:12mm}
   @media print{
-    body{background:#fff}.actions,.filters,.banner{display:none!important}
+    :root{ --bg:#fff; --card:#fff; --ink:#14201b; --ink2:#3a4a43; --muted:#5b6b64; --line:#cfd8d3; --grid:#e9eeeb;
+      --accent:#0b7a55; --accent-ink:#fff; --accent-soft:#e3f2ec; --bad:#b4232e; --bad-soft:#fbe9ea; --warn:#9a6100; --warn-soft:#fdf3e1; }
+    *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+    body{background:#fff;color:#14201b}
+    .wrap{max-width:none;padding:0}
+    .actions,.filters,.banner,#logout{display:none!important}
     .panel,.kpi{box-shadow:none;break-inside:avoid}
+    .kpis{grid-template-columns:repeat(5,1fr);gap:8px}
+    .kpi{padding:10px 12px}.kpi strong{font-size:22px}
+    .grid{grid-template-columns:repeat(12,1fr)}
+    .s6,.s4,.s8{grid-column:span 6}
+    .chart{height:auto!important}
+    .chart canvas{display:none!important}
+    .print-img{display:block}
+    table{font-size:11px}
   }
 </style>
 </head>
@@ -437,6 +452,29 @@ async function showDash(){
 
 $('reload').onclick = load;
 $('csv').onclick = exportCsv;
+/* Impresión / PDF: se redibujan las gráficas en colores claros y sin animación,
+   y se sustituyen por imágenes fijas para que el PDF no salga vacío. */
+function preparePrint(){
+  if (!ALL.length) return;
+  const root = document.documentElement, prevTheme = root.dataset.theme;
+  root.dataset.theme = 'light';
+  const prevAnim = Chart.defaults.animation;
+  Chart.defaults.animation = false;
+  render();
+  charts.forEach(c => {
+    c.resize(560, c.canvas.parentNode.clientHeight || 260);
+    const img = Object.assign(document.createElement('img'), { className: 'print-img', src: c.toBase64Image('image/png', 1), alt: '' });
+    c.canvas.parentNode.appendChild(img);
+  });
+  Chart.defaults.animation = prevAnim;
+  preparePrint.restore = () => {
+    document.querySelectorAll('.print-img').forEach(i => i.remove());
+    if (prevTheme === undefined) delete root.dataset.theme; else root.dataset.theme = prevTheme;
+    render();
+  };
+}
+window.addEventListener('beforeprint', preparePrint);
+window.addEventListener('afterprint', () => preparePrint.restore && preparePrint.restore());
 $('print').onclick = () => window.print();
 $('logout').onclick = async () => { await sb.auth.signOut(); location.reload(); };
 matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => ALL.length && render());
