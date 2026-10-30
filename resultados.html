@@ -454,28 +454,45 @@ $('reload').onclick = load;
 $('csv').onclick = exportCsv;
 /* Impresión / PDF: se redibujan las gráficas en colores claros y sin animación,
    y se sustituyen por imágenes fijas para que el PDF no salga vacío. */
+let printReady = false;
 function preparePrint(){
-  if (!ALL.length) return;
+  if (!ALL.length || printReady) return [];
+  printReady = true;
   const root = document.documentElement, prevTheme = root.dataset.theme;
   root.dataset.theme = 'light';
   const prevAnim = Chart.defaults.animation;
   Chart.defaults.animation = false;
   render();
-  charts.forEach(c => {
+  const imgs = charts.map(c => {
     c.resize(560, c.canvas.parentNode.clientHeight || 260);
-    const img = Object.assign(document.createElement('img'), { className: 'print-img', src: c.toBase64Image('image/png', 1), alt: '' });
+    c.update('none');
+    const img = Object.assign(document.createElement('img'), { className: 'print-img', alt: '' });
+    img.src = c.toBase64Image('image/png', 1);
     c.canvas.parentNode.appendChild(img);
+    return img;
   });
   Chart.defaults.animation = prevAnim;
   preparePrint.restore = () => {
+    if (!printReady) return;
+    printReady = false;
     document.querySelectorAll('.print-img').forEach(i => i.remove());
     if (prevTheme === undefined) delete root.dataset.theme; else root.dataset.theme = prevTheme;
     render();
   };
+  return imgs;
 }
+// Ctrl+P: se prepara al vuelo (Chrome, Edge, Firefox avisan antes de imprimir).
 window.addEventListener('beforeprint', preparePrint);
-window.addEventListener('afterprint', () => preparePrint.restore && preparePrint.restore());
-$('print').onclick = () => window.print();
+window.addEventListener('afterprint', () => setTimeout(() => preparePrint.restore && preparePrint.restore(), 300));
+// Botón: prepara, espera a que las imágenes estén listas y luego imprime (también en Safari y móvil).
+$('print').onclick = async () => {
+  const btn = $('print'); btn.disabled = true;
+  const imgs = preparePrint();
+  await Promise.all(imgs.map(i => i.decode().catch(() => {})));
+  await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+  btn.disabled = false;
+  window.print();
+};
 $('logout').onclick = async () => { await sb.auth.signOut(); location.reload(); };
 matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => ALL.length && render());
 
